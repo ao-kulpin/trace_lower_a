@@ -15,9 +15,7 @@ class Tracer extends Phaser.Scene
         this.whiteLetter.setScale(imgRate);
 
         this.flllZone = this.add.rectangle(config.width/2, config.height/2, 
-                                config.width, config.height, 0x00FF00);
-        //const fillMask = this.composeMask(0, 0);
-        //this.flllZone.setMask(fillMask);
+                                config.width, config.height, 0x007F00);
                         
         this.traceArrow = this.add.image(437 * posRate, 144 * posRate, 'traceArrow')
                                 .setScale(imgRate)
@@ -33,6 +31,16 @@ class Tracer extends Phaser.Scene
         points.forEach(element => {
             console.log(`${element.x} ${element.y}`)
         });
+
+        // objects for composing the filling mask
+        this.maskTexture = this.make.renderTexture({x: config.width/2, y: config.height/2, 
+                                            width: config.width, height: config.height, add: false});
+        this.maskLetter = this.make.image({x:config.width/2, y:config.height/2, add:false, key: 'mainMask'});
+        this.maskLetter.setScale(imgRate);
+        this.maskContainer = this.make.container({x:config.width/2, y:config.height/2, add: false});
+        this.maskContainer.add(this.maskLetter); 
+        this.maskGraphics = this.make.graphics();
+                              
 
         const fillMask = this.composeMask(this.elemPath.getPoints(), 0);
         this.flllZone.setMask(fillMask);
@@ -68,18 +76,10 @@ class Tracer extends Phaser.Scene
         const imgRate = config.width/this.whiteLetter.width;
         const posRate = config.width/config.basicWidth;
         const maskShift = 0;
-        const rt = this.make.renderTexture({x: config.width/2, y: config.height/2, 
-                                            width: config.width, height: config.height, add: false});
-        const letter = this.make.image({x:config.width/2, y:config.height/2, add:false, key: 'mainMask'});
-        letter.setScale(imgRate);
-
-        const cont = this.make.container({x:config.width/2, y:config.height/2, add: false});
-        cont.add(letter);           
+        this.maskTexture.clear();
+        this.maskGraphics.clear();
         
-        const deadGr = this.make.graphics();
-
-        deadGr.fillStyle(0xFFFFFF, 1);
-        // deadGr.fillRect(maskShift, maskShift, (393 + 4)* posRate + maskShift, 500 * posRate + maskShift);
+        this.maskGraphics.fillStyle(0xFFFFFF, 1);
 
         const tailPoints = [];
         for (let i = 0; i < endIndex; ++i) {
@@ -92,13 +92,13 @@ class Tracer extends Phaser.Scene
 
         if (endIndex != 0) {
             // beginning of the path
-            deadGr.fillCircle(x0, y0, 40 * posRate);
+            this.maskGraphics.fillCircle(x0, y0, 40 * posRate);
         }
 
         if (endIndex == path.length - 1) {
             // not the end of the path
             const last = tailPoints.length - 2;
-            deadGr.fillCircle(tailPoints[last], tailPoints[last + 1], 40 * posRate);
+            this.maskGraphics.fillCircle(tailPoints[last], tailPoints[last + 1], 40 * posRate);
         }
 
         console.log(`++++++ 1 tail ${tailPoints[0]} ${tailPoints[1]}`)
@@ -111,17 +111,16 @@ class Tracer extends Phaser.Scene
         deadPath.splineTo(tailPoints);
         console.log(`++++++ 1.2 tail ${tailPoints[0]} ${tailPoints[1]}`)
 
-        deadGr.lineStyle(80 * posRate, 0xFF0000);
-        //deadGr.fillRect(x0 + maskShift, y0 + maskShift, 50 * posRate + maskShift, 100 * posRate + maskShift);
+        this.maskGraphics.lineStyle(83 * posRate, 0xFF0000);
         console.log(`++++++ 2 tail ${tailPoints[0]} ${tailPoints[1]}`)
-        deadPath.draw(deadGr);
+        deadPath.draw(this.maskGraphics);
 
-        const deadMask = new Phaser.Display.Masks.BitmapMask(this, deadGr);
+        const fillMask = new Phaser.Display.Masks.BitmapMask(this, this.maskGraphics);
         // deadMask.invertAlpha = true;
 
-        cont.setMask(deadMask);        
-        rt.draw(cont, maskShift, maskShift);
-        const mask = rt.createBitmapMask();
+        this.maskContainer.setMask(fillMask);        
+        this.maskTexture.draw(this.maskContainer, maskShift, maskShift);
+        const mask = this.maskTexture.createBitmapMask();
         //mask.invertAlpha = true;
         return mask;
     }
