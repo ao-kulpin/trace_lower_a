@@ -64,7 +64,7 @@ class Tracer extends Phaser.Scene
         })       
     }
 
-    composeMask(path, startIndex) {
+    composeMask(path, endIndex) {
         const imgRate = config.width/this.whiteLetter.width;
         const posRate = config.width/config.basicWidth;
         const maskShift = 0;
@@ -79,10 +79,10 @@ class Tracer extends Phaser.Scene
         const deadGr = this.make.graphics();
 
         deadGr.fillStyle(0xFFFFFF, 1);
-        deadGr.fillRect(maskShift, maskShift, (393 + 4)* posRate + maskShift, 500 * posRate + maskShift);
+        // deadGr.fillRect(maskShift, maskShift, (393 + 4)* posRate + maskShift, 500 * posRate + maskShift);
 
         const tailPoints = [];
-        for (let i = startIndex; i < path.length; ++i) {
+        for (let i = 0; i < endIndex; ++i) {
             const p = path[i];
             tailPoints.push(p.x);
             tailPoints.push(p.y);
@@ -90,12 +90,12 @@ class Tracer extends Phaser.Scene
         const x0 = tailPoints[0];
         const y0 = tailPoints[1];
 
-        if (startIndex == 0) {
+        if (endIndex != 0) {
             // beginning of the path
             deadGr.fillCircle(x0, y0, 40 * posRate);
         }
 
-        if (startIndex != path.length - 1) {
+        if (endIndex == path.length - 1) {
             // not the end of the path
             const last = tailPoints.length - 2;
             deadGr.fillCircle(tailPoints[last], tailPoints[last + 1], 40 * posRate);
@@ -117,7 +117,7 @@ class Tracer extends Phaser.Scene
         deadPath.draw(deadGr);
 
         const deadMask = new Phaser.Display.Masks.BitmapMask(this, deadGr);
-        deadMask.invertAlpha = true;
+        // deadMask.invertAlpha = true;
 
         cont.setMask(deadMask);        
         rt.draw(cont, maskShift, maskShift);
