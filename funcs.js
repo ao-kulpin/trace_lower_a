@@ -45,6 +45,10 @@ class LetterElem {
         return this.#totalPoints;
     }
 
+    get startPoints() {
+        return this.#totalPoints.slice(0, this.#index * 2 + 1);
+    }
+
     get path() {
         return this.#path;
     }
