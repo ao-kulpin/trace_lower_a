@@ -51,24 +51,30 @@ class Tracer extends Phaser.Scene
         this.curElem.path.draw(this.pathGr);
 
 
-
+        let pi = 0;
+        let si = 0;
+        let bp = "";
+        let printed = false;
+        let bx = -1;
+        let by = -1;
         this.input.on('pointermove', pointer => {
             /////////console.log(`pointer move ${pointer.x} ${pointer.y}`)
             if (pointer.isDown) {
-                const arrowDist = Phaser.Math.Distance.Chebyshev(pointer.x, pointer.y, 
-                                                            this.traceArrow.x, this.traceArrow.y);
-                const findRes = findNearestPoint(pointer.x, pointer.y, this.curElem.totalPoints);
-                //console.log(`nearest ${findRes.x} ${findRes.y}  ${findRes.dist} ${findRes.index}`)
-                if (findRes.dist < config.pullDist && arrowDist < config.pullDist) {
-                    this.curElem.index = findRes.index;
-                    this.traceArrow.setPosition(findRes.x, findRes.y);
-                    const mask = this.composeMask(this.curElem);
-                    this.flllZone.setMask(mask);
-                    console.log(`path pos ${findRes.x} ${findRes.y}`)
-                }
-                console.log(`mouse pos ${pointer.x} ${pointer.y}`)
+                this.traceArrow.setPosition(pointer.x, pointer.y);
+                console.log(`point ${++pi}: ${Math.floor(pointer.x)}, ${Math.floor(pointer.y)}`)
+                bx = pointer.x;
+                by = pointer.y;
+                printed = false;
             } 
-        })       
+        });
+        this.input.on('pointerup', pointer => {
+            if (!printed) {
+                bp += `  ${Math.floor(bx)}, ${Math.floor(by)},`;
+                console.log(`++++base points ${++si}: ${bp}`);
+            }
+            printed = true;
+    });
+      
     }
 
     composeMask(elem) {
@@ -109,6 +115,7 @@ class Tracer extends Phaser.Scene
         return mask;
     }
 }
+
 
 const config = {
     width: 600,
