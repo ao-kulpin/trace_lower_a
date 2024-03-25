@@ -22,7 +22,7 @@ class Tracer extends Phaser.Scene
                                 .setAngle(180);
 
 
-        this.elem2 = new LetterElem({basePoints: config.basePoints2.map(xy => xy*posRate)});
+        this.elem2 = new LetterElem({basePoints: config.basePoints1.map(xy => xy*posRate)});
         this.curElem = this.elem2;
 
         //const points = this.elemPath.getPoints();
@@ -115,7 +115,11 @@ const config = {
     height: 600,
     basicWidth: 600,
     pullDist: 50000,
-    basePoints2: [437, 144, 437, 455],
+    basePoints1: [437, 235,  397, 197,  381, 184,  359, 170,  344, 162,  322, 155,  302, 154,
+                  284, 155,  259, 161,  236, 171,  229, 176,  216, 185,  197, 205,  188, 223,  
+                  175, 255,  169, 293,  173, 338,  188, 378,  224, 422,  255, 437,  299, 444,  
+                  341, 438,  367, 425,  387, 410,  410, 379,  423, 353,  429, 334,  437, 144],
+    basePoints2: [437, 144,  437, 455],
     type: Phaser.AUTO,
     backgroundColor: '#118eb3',
     /// parent: 'phaser-example',
