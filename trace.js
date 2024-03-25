@@ -81,14 +81,14 @@ class Tracer extends Phaser.Scene
         
         this.maskGraphics.fillStyle(0xFFFFFF, 1);
 
-        const tailPoints = [];
+        const startPoints = [];
         for (let i = 0; i < endIndex; ++i) {
             const p = path[i];
-            tailPoints.push(p.x);
-            tailPoints.push(p.y);
+            startPoints.push(p.x);
+            startPoints.push(p.y);
         }
-        const x0 = tailPoints[0];
-        const y0 = tailPoints[1];
+        const x0 = startPoints[0];
+        const y0 = startPoints[1];
 
         if (endIndex != 0) {
             // beginning of the path
@@ -97,22 +97,14 @@ class Tracer extends Phaser.Scene
 
         if (endIndex == path.length - 1) {
             // not the end of the path
-            const last = tailPoints.length - 2;
-            this.maskGraphics.fillCircle(tailPoints[last], tailPoints[last + 1], 40 * posRate);
+            const last = startPoints.length - 2;
+            this.maskGraphics.fillCircle(startPoints[last], startPoints[last + 1], 40 * posRate);
         }
 
-        console.log(`++++++ 1 tail ${tailPoints[0]} ${tailPoints[1]}`)
-        console.log(`-------- length ${path.length} ${tailPoints.length}`)
-        path.forEach(p=>console.log(`path ${p}`));
-        tailPoints.forEach(p=>console.log(`tailPoint ${p}`));
-        console.log(`++++++ 1.1 tail ${tailPoints[0]} ${tailPoints[1]}`)
-        const deadPath = new Phaser.Curves.Path(tailPoints[0], tailPoints[1]);
-        console.log(`++++++ 1.1.1 tail ${tailPoints[0]} ${tailPoints[1]}`)
-        deadPath.splineTo(tailPoints);
-        console.log(`++++++ 1.2 tail ${tailPoints[0]} ${tailPoints[1]}`)
+        const deadPath = new Phaser.Curves.Path(startPoints[0], startPoints[1]);
+        deadPath.splineTo(startPoints);
 
         this.maskGraphics.lineStyle(83 * posRate, 0xFF0000);
-        console.log(`++++++ 2 tail ${tailPoints[0]} ${tailPoints[1]}`)
         deadPath.draw(this.maskGraphics);
 
         const fillMask = new Phaser.Display.Masks.BitmapMask(this, this.maskGraphics);
