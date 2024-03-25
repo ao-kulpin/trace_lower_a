@@ -26,10 +26,13 @@ class Tracer extends Phaser.Scene
         this.elemPath = new Phaser.Curves.Path(elemBasePoints[0], elemBasePoints[1]);
         this.elemPath.splineTo([elemBasePoints[2], elemBasePoints[3]]);
 
-        const points = this.elemPath.getPoints();
+        this.elem2 = new LetterElem({basePoints: config.basePoints2.map(xy => xy*posRate)});
+
+//        const points = this.elemPath.getPoints();
+        const points = this.elem2.totalPoints;
         console.log(`*********path ${points.length}`)
         points.forEach(element => {
-            console.log(`${element.x} ${element.y}`)
+            console.log(`${element}`)
         });
 
         // objects for composing the filling mask
@@ -39,8 +42,7 @@ class Tracer extends Phaser.Scene
         this.maskLetter.setScale(imgRate);
         this.maskContainer = this.make.container({x:config.width/2, y:config.height/2, add: false});
         this.maskContainer.add(this.maskLetter); 
-        this.maskGraphics = this.make.graphics();
-                              
+        this.maskGraphics = this.make.graphics();                              
 
         const fillMask = this.composeMask(this.elemPath.getPoints(), 0);
         this.flllZone.setMask(fillMask);
@@ -119,10 +121,11 @@ class Tracer extends Phaser.Scene
 }
 
 const config = {
-    width: 900,
-    height: 900,
+    width: 600,
+    height: 600,
     basicWidth: 600,
     pullDist: 50000,
+    basePoints2: [437, 144, 437, 455],
     type: Phaser.AUTO,
     backgroundColor: '#118eb3',
     /// parent: 'phaser-example',
