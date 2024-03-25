@@ -1,17 +1,20 @@
-function findNearestPoint(point, path) {
+function findNearestPoint(x, y, path) {
     let minDist = 1e6;
-    let bestPoint = undefined;
+    let bestX = 0;
+    let bestY = 0;
     let index = 0;
-    for(let i = 0; i < path.length; ++i) {
-        const pathPoint = path[i];
-        const dist = Phaser.Math.Distance.BetweenPointsSquared(point, pathPoint);
+    for(let i = 0; i < path.length; i += 2) {
+        const px = path[i];
+        const py = path[i + 1];
+        const dist = Phaser.Math.Distance.Chebyshev(x, y, px, py);
         if (dist < minDist){
             minDist = dist;
-            bestPoint = pathPoint;
-            index = i;
+            bestX = px;
+            bestY = py;
+            index = i / 2;
         }
     }
-    return {point: bestPoint, dist: minDist, index: index}
+    return {x: bestX, y:bestY, dist: minDist, index: index}
 }
 
 class LetterElem {
@@ -27,7 +30,7 @@ class LetterElem {
             this.#path.splineTo(this.#basePoints.slice(2));
 
             const pathPoints = this.#path.getPoints();
-            this.#totalPoints = [];
+            this.#totalPoints = []; //[this.#basePoints[0], this.#basePoints[1]];
             pathPoints.forEach(pp => {
                 this.#totalPoints.push(pp.x);
                 this.#totalPoints.push(pp.y);                
@@ -46,7 +49,7 @@ class LetterElem {
     }
 
     get startPoints() {
-        return this.#totalPoints.slice(0, this.#index * 2 + 1);
+        return this.#totalPoints.slice(0, this.#index * 2);
     }
 
     get path() {

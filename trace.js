@@ -22,17 +22,12 @@ class Tracer extends Phaser.Scene
                                 .setAngle(180);
 
 
-        const elemBasePoints = [437, 144, 437, 455].map(x => x*posRate);  
-        this.elemPath = new Phaser.Curves.Path(elemBasePoints[0], elemBasePoints[1]);
-        this.elemPath.splineTo([elemBasePoints[2], elemBasePoints[3]]);
-
         this.elem2 = new LetterElem({basePoints: config.basePoints2.map(xy => xy*posRate)});
-
         this.curElem = this.elem2;
 
-//        const points = this.elemPath.getPoints();
-        const points = this.elem2.totalPoints;
-        console.log(`*********path ${points.length}`)
+        //const points = this.elemPath.getPoints();
+        const points = this.curElem.totalPoints;
+        console.log(`*********path ${points.length} base ${this.curElem.basePoints[0]} ${this.curElem.basePoints[1]}`)
         points.forEach(element => {
             console.log(`${element}`)
         });
@@ -53,25 +48,23 @@ class Tracer extends Phaser.Scene
         this.pathGr = this.add.graphics();
 
         this.pathGr.lineStyle(1, 0xFF);
-        this.elemPath.draw(this.pathGr);
+        this.curElem.path.draw(this.pathGr);
 
 
 
         this.input.on('pointermove', pointer => {
-            console.log(`pointer move ${pointer.x} ${pointer.y}`)
+            /////////console.log(`pointer move ${pointer.x} ${pointer.y}`)
             if (pointer.isDown) {
-                const ptr = new Phaser.Math.Vector2(pointer.x, pointer.y);
-                const arrowPtr = new Phaser.Math.Vector2(this.traceArrow.x, this.traceArrow.y);
-                const arrowDist =Phaser.Math.Distance.BetweenPointsSquared(ptr, arrowPtr);
-                const findRes = findNearestPoint(ptr, this.curElem.path.getPoints());
-                console.log(`nearest ${findRes.point.x} ${findRes.point.y}  ${findRes.dist}`)
-                Phaser.Math.Distance.BetweenPointsSquared
+                const arrowDist = Phaser.Math.Distance.Chebyshev(pointer.x, pointer.y, 
+                                                            this.traceArrow.x, this.traceArrow.y);
+                const findRes = findNearestPoint(pointer.x, pointer.y, this.curElem.totalPoints);
+                //console.log(`nearest ${findRes.x} ${findRes.y}  ${findRes.dist} ${findRes.index}`)
                 if (findRes.dist < config.pullDist && arrowDist < config.pullDist) {
                     this.curElem.index = findRes.index;
-                    this.traceArrow.setPosition(findRes.point.x, findRes.point.y);
+                    this.traceArrow.setPosition(findRes.x, findRes.y);
                     const mask = this.composeMask(this.curElem);
                     this.flllZone.setMask(mask);
-                    console.log(`path pos ${findRes.point.x} ${findRes.point.x}`)
+                    console.log(`path pos ${findRes.x} ${findRes.y}`)
                 }
                 console.log(`mouse pos ${pointer.x} ${pointer.y}`)
             } 
@@ -89,25 +82,22 @@ class Tracer extends Phaser.Scene
 
         const startPoints = elem.startPoints;
 
-        const x0 = startPoints[0];
-        const y0 = startPoints[1];
-
         if (elem.index != 0) {
-            // beginning of the path
-            this.maskGraphics.fillCircle(x0, y0, 45 * posRate);
+            // not beginning of the path
+            this.maskGraphics.fillCircle(startPoints[0], startPoints[1], 40 * posRate);
         }
 
         if (elem.index == elem.totalPoints.length / 2 - 1) {
-            // not the end of the path
+            // the end of the path
             const last = startPoints.length - 2;
-            this.maskGraphics.fillCircle(startPoints[last], startPoints[last + 1], 45 * posRate);
+            this.maskGraphics.fillCircle(startPoints[last], startPoints[last + 1], 40 * posRate);
         }
 
-        const deadPath = new Phaser.Curves.Path(startPoints[0], startPoints[1]);
-        deadPath.splineTo(startPoints.slice(2, startPoints.length));
+        const maskPath = new Phaser.Curves.Path(startPoints[0], startPoints[1]);
+        maskPath.splineTo(startPoints.slice(2));
 
         this.maskGraphics.lineStyle(83 * posRate, 0xFF0000);
-        deadPath.draw(this.maskGraphics);
+        maskPath.draw(this.maskGraphics);
 
         const fillMask = new Phaser.Display.Masks.BitmapMask(this, this.maskGraphics);
         // deadMask.invertAlpha = true;
@@ -121,8 +111,8 @@ class Tracer extends Phaser.Scene
 }
 
 const config = {
-    width: 1900,
-    height: 1900,
+    width: 600,
+    height: 600,
     basicWidth: 600,
     pullDist: 50000,
     basePoints2: [437, 144, 437, 455],
