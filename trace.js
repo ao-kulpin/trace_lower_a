@@ -55,14 +55,12 @@ class Tracer extends Phaser.Scene
         this.pathGr.lineStyle(1, 0xFF);
         this.curElem.path.draw(this.pathGr);
 
-
-
         this.input.on('pointermove', pointer => {
             /////////console.log(`pointer move ${pointer.x} ${pointer.y}`)
             if (pointer.isDown) {
                 const arrowDist = Phaser.Math.Distance.Chebyshev(pointer.x, pointer.y, 
                                                             this.traceArrow.x, this.traceArrow.y);
-                const findRes = findNearestPoint(pointer.x, pointer.y, this.curElem.totalPoints);
+                const findRes = findNearestPoint(pointer.x, pointer.y, this.curElem);
                 //console.log(`nearest ${findRes.x} ${findRes.y}  ${findRes.dist} ${findRes.index}`)
                 if (findRes.dist < config.pullDist && arrowDist < config.pullDist) {
                     this.curElem.index = findRes.index;

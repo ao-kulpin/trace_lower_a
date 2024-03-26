@@ -1,11 +1,21 @@
-function findNearestPoint(x, y, path) {
+function findNearestPoint(x, y, elem) {
+    const scrollRate = 0.2;
+
+    const {totalPoints, index: elemIndex} = elem;
+
+    const tplen = totalPoints.length / 2;
+    const scrollSize = tplen * scrollRate;
+    const startIndex = Math.floor(Math.max(elemIndex - scrollSize, 0));
+    const endIndex = Math.floor(Math.min(elemIndex + scrollSize, tplen));
+console.log(`++++++ findNearestPoint eli=${elemIndex} si=${startIndex} eni=${endIndex} ss=${scrollSize}`)    
+
     let minDist = 1e6;
     let bestX = 0;
     let bestY = 0;
     let index = 0;
-    for(let i = 0; i < path.length; i += 2) {
-        const px = path[i];
-        const py = path[i + 1];
+    for(let i = startIndex * 2; i < endIndex * 2; i += 2) {
+        const px = totalPoints[i];
+        const py = totalPoints[i + 1];
         const dist = Phaser.Math.Distance.Chebyshev(x, y, px, py);
         if (dist < minDist){
             minDist = dist;
