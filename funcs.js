@@ -22,6 +22,9 @@ class LetterElem {
     #path = undefined;
     #totalPoints = [];
     #index = 0;
+    #width = 83;
+    #firstCircle = 40;
+    #lastCircle = 40;
 
     constructor({basePoints = []}) {
         this.#basePoints = basePoints;
@@ -49,7 +52,7 @@ class LetterElem {
     }
 
     get startPoints() {
-        return this.#totalPoints.slice(0, this.#index * 2);
+        return this.#totalPoints.slice(0, this.#index * 2 + 2);
     }
 
     get path() {
@@ -63,4 +66,30 @@ class LetterElem {
     set index(value) {
         this.#index = value;
     }
+
+    get width() {
+        return this.#width;
+    }
+
+    set width(value) {
+        this.#width = value;
+    }
+
+    get firstCircle() {
+        return this.#firstCircle;
+    }
+
+    set firstCircle(value) {
+        this.#firstCircle = value;
+    }
+
+    get lastCircle() {
+        return this.#lastCircle;
+    }
+
+    set lastCircle(value) {
+        this.#lastCircle = value;
+    }
+
+
 }

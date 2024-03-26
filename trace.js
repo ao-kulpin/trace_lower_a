@@ -22,14 +22,19 @@ class Tracer extends Phaser.Scene
                                 .setAngle(180);
 
 
-        this.elem2 = new LetterElem({basePoints: config.basePoints1.map(xy => xy*posRate)});
-        this.curElem = this.elem2;
+        this.elem1 = new LetterElem({basePoints: config.basePoints1.map(xy => xy*posRate)});
+        this.elem1.width = 100;
+        this.elem1.firstCircle = 50;
+        this.elem1.lastCircle = 50;
+        this.curElem = this.elem1;
 
         //const points = this.elemPath.getPoints();
         const points = this.curElem.totalPoints;
         console.log(`*********path ${points.length} base ${this.curElem.basePoints[0]} ${this.curElem.basePoints[1]}`)
+        let np = 0;
         points.forEach(element => {
-            console.log(`${element}`)
+            console.log(`${Math.floor(np/2)}: ${element}`);
+            ++ np;
         });
 
         // objects for composing the filling mask
@@ -84,19 +89,21 @@ class Tracer extends Phaser.Scene
 
         if (elem.index != 0) {
             // not beginning of the path
-            this.maskGraphics.fillCircle(startPoints[0], startPoints[1], 40 * posRate);
+            this.maskGraphics.fillCircle(startPoints[0], startPoints[1], elem.firstCircle * posRate);
         }
 
         if (elem.index == elem.totalPoints.length / 2 - 1) {
             // the end of the path
             const last = startPoints.length - 2;
-            this.maskGraphics.fillCircle(startPoints[last], startPoints[last + 1], 40 * posRate);
+            this.maskGraphics.fillCircle(startPoints[last], startPoints[last + 1], 
+                                         elem.lastCircle * posRate);
+            /////console.log(`++++++++++ end of path ${startPoints[last]} ${startPoints[last+1]} circle ${elem.lastCircle}`)
         }
 
         const maskPath = new Phaser.Curves.Path(startPoints[0], startPoints[1]);
         maskPath.splineTo(startPoints.slice(2));
 
-        this.maskGraphics.lineStyle(83 * posRate, 0xFF0000);
+        this.maskGraphics.lineStyle(elem.width * posRate, 0xFF0000);
         maskPath.draw(this.maskGraphics);
 
         const fillMask = new Phaser.Display.Masks.BitmapMask(this, this.maskGraphics);
