@@ -27,6 +27,7 @@ class Tracer extends Phaser.Scene
         this.elem1.firstCircle = 50;
         this.elem1.lastCircle = 50;
         this.curElem = this.elem1;
+        this.relocateTracer();
 
         //const points = this.elemPath.getPoints();
         const points = this.curElem.totalPoints;
@@ -64,9 +65,10 @@ class Tracer extends Phaser.Scene
                 //console.log(`nearest ${findRes.x} ${findRes.y}  ${findRes.dist} ${findRes.index}`)
                 if (findRes.dist < config.pullDist && arrowDist < config.pullDist) {
                     this.curElem.index = findRes.index;
-                    this.traceArrow.setPosition(findRes.x, findRes.y);
+                    // this.traceArrow.setPosition(findRes.x, findRes.y);
                     const mask = this.composeMask(this.curElem);
                     this.flllZone.setMask(mask);
+                    this.relocateTracer();
                     console.log(`path pos ${findRes.x} ${findRes.y}`)
                 }
                 console.log(`mouse pos ${pointer.x} ${pointer.y}`)
@@ -113,6 +115,14 @@ class Tracer extends Phaser.Scene
         //mask.invertAlpha = true;
         return mask;
     }
+
+    relocateTracer() {
+        const {index, totalPoints} = this.curElem;
+        const xyi = index * 2;
+        this.traceArrow.setPosition(totalPoints[xyi], totalPoints[xyi +1]); 
+    }
+
+
 }
 
 const config = {
