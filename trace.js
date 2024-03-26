@@ -18,8 +18,8 @@ class Tracer extends Phaser.Scene
                                 config.width, config.height, 0x007F00);
                         
         this.traceArrow = this.add.image(437 * posRate, 144 * posRate, 'traceArrow')
-                                .setScale(imgRate)
-                                .setAngle(180);
+                                .setScale(imgRate);
+                                //////////.setAngle(45);
 
 
         this.elem1 = new LetterElem({basePoints: config.basePoints1.map(xy => xy*posRate)});
@@ -54,7 +54,7 @@ class Tracer extends Phaser.Scene
         this.pathGr = this.add.graphics();
 
         this.pathGr.lineStyle(1, 0xFF);
-        this.curElem.path.draw(this.pathGr);
+        this.curElem.path.draw(this.pathGr, 1024);
 
         this.input.on('pointermove', pointer => {
             /////////console.log(`pointer move ${pointer.x} ${pointer.y}`)
@@ -65,7 +65,6 @@ class Tracer extends Phaser.Scene
                 //console.log(`nearest ${findRes.x} ${findRes.y}  ${findRes.dist} ${findRes.index}`)
                 if (findRes.dist < config.pullDist && arrowDist < config.pullDist) {
                     this.curElem.index = findRes.index;
-                    // this.traceArrow.setPosition(findRes.x, findRes.y);
                     const mask = this.composeMask(this.curElem);
                     this.flllZone.setMask(mask);
                     this.relocateTracer();
@@ -117,9 +116,14 @@ class Tracer extends Phaser.Scene
     }
 
     relocateTracer() {
-        const {index, totalPoints} = this.curElem;
+        const {index, totalPoints, path, length: elemLen} = this.curElem;
         const xyi = index * 2;
-        this.traceArrow.setPosition(totalPoints[xyi], totalPoints[xyi +1]); 
+        this.traceArrow.setPosition(totalPoints[xyi], totalPoints[xyi +1]);
+
+        // rotate the traceArrow
+        const tang = path.getTangent(this.curElem.indexDistance /  this.curElem.fullDistance);
+        const tangAngle = Phaser.Math.RadToDeg(tang.angle());
+        this.traceArrow.setAngle(tangAngle + 90);
     }
 
 

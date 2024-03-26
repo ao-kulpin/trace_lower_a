@@ -31,6 +31,7 @@ class LetterElem {
     #basePoints = [];
     #path = undefined;
     #totalPoints = [];
+    #distances = [];
     #index = 0;
     #width = 83;
     #firstCircle = 40;
@@ -48,6 +49,22 @@ class LetterElem {
                 this.#totalPoints.push(pp.x);
                 this.#totalPoints.push(pp.y);                
             });
+
+            let dist = 0;
+            let px;
+            let py;
+            this.#distances = [];
+            for (let i = 0; i < this.#totalPoints.length; i += 2) {
+                const x = this.#totalPoints[i];
+                const y = this.#totalPoints[i + 1];
+                if (i > 0) {
+                    dist += Phaser.Math.Distance.Chebyshev(x, y, px, py);
+                }
+                this.#distances.push(dist);
+                px = x;
+                py = y;
+            }
+    
 
             this.#index = 0;
         }
@@ -101,5 +118,15 @@ class LetterElem {
         this.#lastCircle = value;
     }
 
+    get length() {
+        return this.#totalPoints.length / 2;
+    }
 
+    get indexDistance() {
+        return this.#distances[this.#index];
+    }
+
+    get fullDistance() {
+        return this.#distances[this.length - 1];
+    }
 }
