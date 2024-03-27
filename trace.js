@@ -3,7 +3,9 @@ class Tracer extends Phaser.Scene
     preload ()
     {
         this.load.image('mainMask', 'assets/a_detail.webp');
+        this.load.image('pattern1', 'assets/pattern1.webp');
         this.load.image('traceArrow', 'assets/tracing-arrow.png');
+        this.load.image('playButton', 'assets/play-button.webp');
     }
 
     create ()
@@ -14,8 +16,9 @@ class Tracer extends Phaser.Scene
         const imgRate = config.width/this.whiteLetter.width;
         this.whiteLetter.setScale(imgRate);
 
-        this.flllZone = this.add.rectangle(config.width/2, config.height/2, 
-                                config.width, config.height, 0x007F00);
+//        this.fillZone = this.add.rectangle(config.width/2, config.height/2, 
+//                                config.width, config.height, 0x007F00);
+        this.fillZone = this.add.image(config.width/2, config.height/2, 'pattern1').setScale(imgRate);
                         
         this.traceArrow = this.add.image(437 * posRate, 144 * posRate, 'traceArrow')
                                 .setScale(imgRate);
@@ -57,7 +60,7 @@ class Tracer extends Phaser.Scene
         this.maskGraphics = this.make.graphics();                              
 
         const fillMask = this.composeMask();
-        this.flllZone.setMask(fillMask);
+        this.fillZone.setMask(fillMask);
 
         this.input.on('pointermove', pointer => {
             /////////console.log(`pointer move ${pointer.x} ${pointer.y}`)
@@ -70,7 +73,7 @@ class Tracer extends Phaser.Scene
                     this.curElem.index = findRes.index;
                     this.nextElem();
                     const mask = this.composeMask();
-                    this.flllZone.setMask(mask);
+                    this.fillZone.setMask(mask);
                     this.relocateTracer();
                     console.log(`path pos ${findRes.x} ${findRes.y}`)
                 }
