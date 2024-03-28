@@ -7,7 +7,6 @@ function findNearestPoint(x, y, elem) {
     const scrollSize = tplen * scrollRate;
     const startIndex = Math.floor(Math.max(elemIndex - scrollSize, 0));
     const endIndex = Math.floor(Math.min(elemIndex + scrollSize, tplen));
-console.log(`++++++ findNearestPoint eli=${elemIndex} si=${startIndex} eni=${endIndex} ss=${scrollSize}`)    
 
     let minDist = 1e6;
     let bestX = 0;
@@ -24,7 +23,7 @@ console.log(`++++++ findNearestPoint eli=${elemIndex} si=${startIndex} eni=${end
             index = i / 2;
         }
     }
-    return {x: bestX, y:bestY, dist: minDist, index: index}
+    return {x: bestX, y:bestY, dist: minDist, index: index};
 }
 
 class LetterElem {

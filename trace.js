@@ -86,26 +86,21 @@ class Tracer extends Phaser.Scene
         this.nextElem(true);
 
         this.input.on('pointermove', pointer => {
-            /////////console.log(`pointer move ${pointer.x} ${pointer.y}`)
             if (this.waitForPlay)
                 return;
             if (pointer.isDown) {
                 const arrowDist = Phaser.Math.Distance.Chebyshev(pointer.x, pointer.y, 
                                                             this.traceArrow.x, this.traceArrow.y);
                 const findRes = findNearestPoint(pointer.x, pointer.y, this.curElem);
-                //console.log(`nearest ${findRes.x} ${findRes.y}  ${findRes.dist} ${findRes.index}`)
-                if (findRes.dist < config.pullDist && arrowDist < config.pullDist) {
+                if (findRes.dist < config.pullDist /*&& arrowDist < config.pullDist */) {
                     this.curElem.index = findRes.index;
                     this.redraw();
                     this.nextElem();
-                    console.log(`path pos ${findRes.x} ${findRes.y}`)
                 }
-                console.log(`mouse pos ${pointer.x} ${pointer.y}`)
             } 
         })
-        let ip = 0;
+
         this.playButton.on('pointerdown', () =>{
-            //////////console.log(`>>>>>>>>>> play ${++ip}`);
             this.nextPattern();
             this.playButton.setVisible(false);
 
@@ -135,7 +130,6 @@ class Tracer extends Phaser.Scene
                 const last = startPoints.length - 2;
                 this.maskGraphics.fillCircle(startPoints[last], startPoints[last + 1], 
                                              elem.lastCircle * posRate);
-                /////console.log(`++++++++++ end of path ${startPoints[last]} ${startPoints[last+1]} circle ${elem.lastCircle}`)
             }
 
             const maskPath = new Phaser.Curves.Path(startPoints[0], startPoints[1]);
@@ -169,6 +163,7 @@ class Tracer extends Phaser.Scene
     startBubbles() {
         const {bubbles, curElem, bubbleStart, bubbleEnd} = this;
         const {totalPoints, fullDistance, length: elemLen, path} = curElem;
+        const {bubbleDuration, bubbleDelayRate, bubbleTaceRate} = config;
         //this.pathGraphics.clear();
         //this.pathGraphics.lineStyle(1, 0xFF);
         //this.curElem.path.draw(this.pathGraphics, 1024);
@@ -181,8 +176,9 @@ class Tracer extends Phaser.Scene
             .setVisible(true)
             .setPosition(totalPoints[2 * elemLen - 2], totalPoints[2 * elemLen - 1]);
 
-        const duration = fullDistance * config.bubbleTaceRate;
-        const delay = duration * config.bubbleDelayRate;
+        const duration = bubbleDuration + fullDistance * config.bubbleTaceRate;
+        const delay = duration * bubbleDelayRate;
+        const repeatDelay = delay * (bubbles.length - 1);
         for (let i = 0; i < bubbles.length; ++i) {
             const bubble = bubbles[i];
             bubble.x = totalPoints[0];
@@ -192,10 +188,10 @@ class Tracer extends Phaser.Scene
                 .setVisible(true)
                 .startFollow({
                     duration: duration,
-                    //yoyo: true,
                     repeat: -1,
-                    //ease: 'Sine.easeInOut',
-                    delay: i * delay
+                    ease: 'Sine.easeInOut',
+                    delay: i * delay,
+                    repeatDelay: repeatDelay
             });
         }
     }
@@ -262,13 +258,14 @@ class Tracer extends Phaser.Scene
 }
 
 const config = {
-    width: 900,
-    height: 900,
+    width: 600,
+    height: 600,
     basicWidth: 600,
     pullDist: 50,
-    bubbleCount: 3,
-    bubbleTaceRate: 2,
-    bubbleDelayRate: 0.12,
+    bubbleCount: 4,
+    bubbleDuration: 1000,
+    bubbleTaceRate: 1,
+    bubbleDelayRate: 0.08,
     basePoints1: [437, 235,  397, 197,  381, 184,  359, 170,  344, 162,  322, 155,  302, 154,
                   284, 155,  259, 161,  236, 171,  229, 176,  216, 185,  197, 205,  188, 223,  
                   175, 255,  169, 293,  173, 338,  188, 378,  224, 422,  255, 437,  299, 444,  
