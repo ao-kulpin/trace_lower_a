@@ -168,29 +168,48 @@ class Tracer extends Phaser.Scene
 
     startBubbles() {
         const {bubbles, curElem, bubbleStart, bubbleEnd} = this;
-        const {totalPoints, fullDistance, length} = curElem;
+        const {totalPoints, fullDistance, length, path} = curElem;
         //this.pathGraphics.clear();
         //this.pathGraphics.lineStyle(1, 0xFF);
         //this.curElem.path.draw(this.pathGraphics, 1024);
 
-        bubbleStart.setPosition(totalPoints[0], totalPoints[1]);
-        bubbleEnd.setPosition(totalPoints[2 * length - 2], totalPoints[2 * length - 1]);
+        bubbleStart
+            .setVisible(true)
+            .setPosition(totalPoints[0], totalPoints[1]);
+
+        bubbleEnd
+            .setVisible(true)
+            .setPosition(totalPoints[2 * length - 2], totalPoints[2 * length - 1]);
 
         const duration = fullDistance * config.bubbleTaceRate;
         const delay = duration * config.bubbleDelayRate;
         for (let i = 0; i < bubbles.length; ++i) {
             const bubble = bubbles[i];
-            bubble.x = curElem.totalPoints[0];
-            bubble.y = curElem.totalPoints[1];
-            bubble.path = curElem.path;
-            bubble.startFollow({
-                duration: duration,
-                //yoyo: true,
-                repeat: -1,
-                //ease: 'Sine.easeInOut',
-                delay: i * delay
+            bubble.x = totalPoints[0];
+            bubble.y = totalPoints[1];
+            bubble.path = path;
+            bubble
+                .setVisible(true)
+                .startFollow({
+                    duration: duration,
+                    //yoyo: true,
+                    repeat: -1,
+                    //ease: 'Sine.easeInOut',
+                    delay: i * delay
             });
         }
+    }
+
+    cancelBubbles() {
+        const {bubbles, bubbleStart, bubbleEnd} = this;
+
+        bubbleStart.setVisible(false);
+        bubbleEnd.setVisible(false);
+
+        bubbles.forEach(b => {
+            b.stop();
+            b.setVisible(false);
+        })
     }
     
     nextElem(newPattern = false) {
@@ -212,6 +231,7 @@ class Tracer extends Phaser.Scene
     }
 
     waitPattern () {
+        this.cancelBubbles();
         this.playButton.setVisible(true);
         this.waitForPlay = true;
     }
