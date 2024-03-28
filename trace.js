@@ -168,7 +168,7 @@ class Tracer extends Phaser.Scene
 
     startBubbles() {
         const {bubbles, curElem, bubbleStart, bubbleEnd} = this;
-        const {totalPoints, fullDistance, length, path} = curElem;
+        const {totalPoints, fullDistance, length: elemLen, path} = curElem;
         //this.pathGraphics.clear();
         //this.pathGraphics.lineStyle(1, 0xFF);
         //this.curElem.path.draw(this.pathGraphics, 1024);
@@ -179,7 +179,7 @@ class Tracer extends Phaser.Scene
 
         bubbleEnd
             .setVisible(true)
-            .setPosition(totalPoints[2 * length - 2], totalPoints[2 * length - 1]);
+            .setPosition(totalPoints[2 * elemLen - 2], totalPoints[2 * elemLen - 1]);
 
         const duration = fullDistance * config.bubbleTaceRate;
         const delay = duration * config.bubbleDelayRate;
@@ -226,11 +226,13 @@ class Tracer extends Phaser.Scene
         }
         else
             this.curElem = this.elem2
+        this.traceArrow.setVisible(true);
         this.startBubbles();
         this.redraw();
     }
 
     waitPattern () {
+        this.traceArrow.setVisible(false);
         this.cancelBubbles();
         this.playButton.setVisible(true);
         this.waitForPlay = true;
