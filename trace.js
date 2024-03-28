@@ -43,7 +43,13 @@ class Tracer extends Phaser.Scene
                                    .setVisible(false);
         this.fillPatterns = [this.fillPattern1, this.fillPattern2, this.fillPattern3, this.fillPattern4];                                   
                         
-        this.traceArrow = this.add.image(437 * posRate, 144 * posRate, 'traceArrow')
+        this.traceArrow = this.add.image(0, 0, 'traceArrow')
+                                .setScale(imgRate);        
+
+        this.bubbleStart = this.add.image(0, 0, 'traceBubble')
+                                .setScale(imgRate);
+
+        this.bubbleEnd = this.add.image(0, 0, 'traceBubble')
                                 .setScale(imgRate);        
 
         this.elem1 = new LetterElem({basePoints: config.basePoints1.map(xy => xy*posRate)});
@@ -161,12 +167,16 @@ class Tracer extends Phaser.Scene
     }
 
     startBubbles() {
-        const {bubbles, curElem} = this;
+        const {bubbles, curElem, bubbleStart, bubbleEnd} = this;
+        const {totalPoints, fullDistance, length} = curElem;
         //this.pathGraphics.clear();
         //this.pathGraphics.lineStyle(1, 0xFF);
         //this.curElem.path.draw(this.pathGraphics, 1024);
 
-        const duration = curElem.fullDistance * config.bubbleTaceRate;
+        bubbleStart.setPosition(totalPoints[0], totalPoints[1]);
+        bubbleEnd.setPosition(totalPoints[2 * length - 2], totalPoints[2 * length - 1]);
+
+        const duration = fullDistance * config.bubbleTaceRate;
         const delay = duration * config.bubbleDelayRate;
         for (let i = 0; i < bubbles.length; ++i) {
             const bubble = bubbles[i];
