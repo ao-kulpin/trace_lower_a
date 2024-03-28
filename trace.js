@@ -262,10 +262,10 @@ class Tracer extends Phaser.Scene
 }
 
 const config = {
-    width: 600,
-    height: 600,
+    width: 900,
+    height: 900,
     basicWidth: 600,
-    pullDist: 50000,
+    pullDist: 50,
     bubbleCount: 3,
     bubbleTaceRate: 2,
     bubbleDelayRate: 0.12,
