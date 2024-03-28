@@ -4,6 +4,7 @@ class Tracer extends Phaser.Scene
     {
         this.load.image('mainMask', 'assets/a_detail.webp');
         this.load.image('traceArrow', 'assets/tracing-arrow.png');
+        this.load.image('traceBubble', 'assets/tracing_bubble.png');
         this.load.image('playButton', 'assets/play-button.webp');
         this.load.image('pattern1', 'assets/pattern1.webp');
         this.load.image('pattern2', 'assets/pattern2.webp');
@@ -65,7 +66,13 @@ class Tracer extends Phaser.Scene
         this.maskLetter.setScale(imgRate);
         this.maskContainer = this.make.container({x:config.width/2, y:config.height/2, add: false});
         this.maskContainer.add(this.maskLetter); 
-        this.maskGraphics = this.make.graphics();                              
+        this.maskGraphics = this.make.graphics();
+        
+        // tracing bubbles
+        this.bubbles = []
+        for (let i = 0; i < config.bubbleCount; ++i) {
+            this.bubbles.push(this.add.follower(null, 0, 0, 'traceBubble').setScale(imgRate));
+        }
 
         this.waitForPlay = false;
         this.fillZone = null;
@@ -92,7 +99,7 @@ class Tracer extends Phaser.Scene
         })
         let ip = 0;
         this.playButton.on('pointerdown', () =>{
-            console.log(`>>>>>>>>>> play ${++ip}`);
+            //////////console.log(`>>>>>>>>>> play ${++ip}`);
             this.nextPattern();
             this.playButton.setVisible(false);
 
@@ -153,10 +160,27 @@ class Tracer extends Phaser.Scene
         this.traceArrow.setAngle(tangAngle + 90);
     }
 
-    drawPath() {
-        this.pathGraphics.clear();
-        this.pathGraphics.lineStyle(1, 0xFF);
-        this.curElem.path.draw(this.pathGraphics, 1024);
+    startBubbles() {
+        const {bubbles, curElem} = this;
+        //this.pathGraphics.clear();
+        //this.pathGraphics.lineStyle(1, 0xFF);
+        //this.curElem.path.draw(this.pathGraphics, 1024);
+
+        const duration = curElem.fullDistance * config.bubbleTaceRate;
+        const delay = duration * config.bubbleDelayRate;
+        for (let i = 0; i < bubbles.length; ++i) {
+            const bubble = bubbles[i];
+            bubble.x = curElem.totalPoints[0];
+            bubble.y = curElem.totalPoints[1];
+            bubble.path = curElem.path;
+            bubble.startFollow({
+                duration: duration,
+                //yoyo: true,
+                repeat: -1,
+                //ease: 'Sine.easeInOut',
+                delay: i * delay
+            });
+        }
     }
     
     nextElem(newPattern = false) {
@@ -173,7 +197,7 @@ class Tracer extends Phaser.Scene
         }
         else
             this.curElem = this.elem2
-        this.drawPath();
+        this.startBubbles();
         this.redraw();
     }
 
@@ -210,6 +234,9 @@ const config = {
     height: 600,
     basicWidth: 600,
     pullDist: 50000,
+    bubbleCount: 3,
+    bubbleTaceRate: 2,
+    bubbleDelayRate: 0.12,
     basePoints1: [437, 235,  397, 197,  381, 184,  359, 170,  344, 162,  322, 155,  302, 154,
                   284, 155,  259, 161,  236, 171,  229, 176,  216, 185,  197, 205,  188, 223,  
                   175, 255,  169, 293,  173, 338,  188, 378,  224, 422,  255, 437,  299, 444,  
