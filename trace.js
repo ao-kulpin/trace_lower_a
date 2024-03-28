@@ -3,9 +3,12 @@ class Tracer extends Phaser.Scene
     preload ()
     {
         this.load.image('mainMask', 'assets/a_detail.webp');
-        this.load.image('pattern1', 'assets/pattern1.webp');
         this.load.image('traceArrow', 'assets/tracing-arrow.png');
         this.load.image('playButton', 'assets/play-button.webp');
+        this.load.image('pattern1', 'assets/pattern1.webp');
+        this.load.image('pattern2', 'assets/pattern2.webp');
+        this.load.image('pattern3', 'assets/pattern3.webp');
+        this.load.image('pattern4', 'assets/pattern4.webp');
     }
 
     create ()
@@ -16,14 +19,31 @@ class Tracer extends Phaser.Scene
         const imgRate = config.width/this.whiteLetter.width;
         this.whiteLetter.setScale(imgRate);
 
-//        this.fillZone = this.add.rectangle(config.width/2, config.height/2, 
-//                                config.width, config.height, 0x007F00);
-        this.fillZone = this.add.image(config.width/2, config.height/2, 'pattern1').setScale(imgRate);
+        this.playButton = this.add.image(config.width/2, config.height*9/10, 'playButton')
+                                .setInteractive()
+                                .setScale(imgRate / 2)
+                                .setVisible(false);
+
+        this.fillRect = this.add.rectangle(config.width/2, config.height/2, 
+                                config.width, config.height, 0x007F00)
+                                   .setVisible(false);
+
+        this.fillPattern1 = this.add.image(config.width/2, config.height/2, 'pattern1')
+                                   .setScale(imgRate)
+                                   .setVisible(false);
+        this.fillPattern2 = this.add.image(config.width/2, config.height/2, 'pattern2')
+                                   .setScale(imgRate)
+                                   .setVisible(false);
+        this.fillPattern3 = this.add.image(config.width/2, config.height/2, 'pattern3')
+                                   .setScale(imgRate)
+                                   .setVisible(false);
+        this.fillPattern4 = this.add.image(config.width/2, config.height/2, 'pattern4')
+                                   .setScale(imgRate)
+                                   .setVisible(false);
+        this.fillPatterns = [this.fillPattern1, this.fillPattern2, this.fillPattern3, this.fillPattern4];                                   
                         
         this.traceArrow = this.add.image(437 * posRate, 144 * posRate, 'traceArrow')
-                                .setScale(imgRate);
-                                //////////.setAngle(45);
-
+                                .setScale(imgRate);        
 
         this.elem1 = new LetterElem({basePoints: config.basePoints1.map(xy => xy*posRate)});
         this.elem1.width = 100;
@@ -38,18 +58,6 @@ class Tracer extends Phaser.Scene
         this.curElem = undefined;
         this.pathGraphics = this.add.graphics();
 
-        this.nextElem();
-        this.relocateTracer();
-
-        //const points = this.elemPath.getPoints();
-        const points = this.curElem.totalPoints;
-        console.log(`*********path ${points.length} base ${this.curElem.basePoints[0]} ${this.curElem.basePoints[1]}`)
-        let np = 0;
-        points.forEach(element => {
-            console.log(`${Math.floor(np/2)}: ${element}`);
-            ++ np;
-        });
-
         // objects for composing the filling mask
         this.maskTexture = this.make.renderTexture({x: config.width/2, y: config.height/2, 
                                             width: config.width, height: config.height, add: false});
@@ -59,11 +67,15 @@ class Tracer extends Phaser.Scene
         this.maskContainer.add(this.maskLetter); 
         this.maskGraphics = this.make.graphics();                              
 
-        const fillMask = this.composeMask();
-        this.fillZone.setMask(fillMask);
+        this.waitForPlay = false;
+        this.fillZone = null;
+        this.nextPattern();
+        this.nextElem(true);
 
         this.input.on('pointermove', pointer => {
             /////////console.log(`pointer move ${pointer.x} ${pointer.y}`)
+            if (this.waitForPlay)
+                return;
             if (pointer.isDown) {
                 const arrowDist = Phaser.Math.Distance.Chebyshev(pointer.x, pointer.y, 
                                                             this.traceArrow.x, this.traceArrow.y);
@@ -71,15 +83,22 @@ class Tracer extends Phaser.Scene
                 //console.log(`nearest ${findRes.x} ${findRes.y}  ${findRes.dist} ${findRes.index}`)
                 if (findRes.dist < config.pullDist && arrowDist < config.pullDist) {
                     this.curElem.index = findRes.index;
+                    this.redraw();
                     this.nextElem();
-                    const mask = this.composeMask();
-                    this.fillZone.setMask(mask);
-                    this.relocateTracer();
                     console.log(`path pos ${findRes.x} ${findRes.y}`)
                 }
                 console.log(`mouse pos ${pointer.x} ${pointer.y}`)
             } 
-        })       
+        })
+        let ip = 0;
+        this.playButton.on('pointerdown', () =>{
+            console.log(`>>>>>>>>>> play ${++ip}`);
+            this.nextPattern();
+            this.playButton.setVisible(false);
+
+            this.waitForPlay = false;
+            this.nextElem(true);
+        });       
     }
 
     composeMask() {
@@ -140,17 +159,49 @@ class Tracer extends Phaser.Scene
         this.curElem.path.draw(this.pathGraphics, 1024);
     }
     
-    nextElem() {
+    nextElem(newPattern = false) {
         if (this.curElem !== undefined && this.curElem.index !== this.curElem.length - 1) 
             return;
 
         if (this.curElem === undefined || this.curElem === this.elem2) {
+            if (!newPattern) {
+                this.waitPattern();
+                return;
+            }
             this.curElem = this.elem1;
             this.elem1.index = this.elem2.index = 0;
         }
         else
             this.curElem = this.elem2
         this.drawPath();
+        this.redraw();
+    }
+
+    waitPattern () {
+        this.playButton.setVisible(true);
+        this.waitForPlay = true;
+    }
+
+    nextPattern () {
+        if (this.fillZone) {
+            this.fillZone.setVisible(false);
+        }
+
+        if (this.fillZone === this.fillRect) {
+            this.fillZone = this.fillPatterns
+                    [Math.floor(Math.random() * this.fillPatterns.length)]
+        }
+        else {
+            this.fillZone = this.fillRect;
+            this.fillZone.fillColor = config.fillColors
+                                [Math.floor(Math.random() * config.fillColors.length)]
+        }
+        this.fillZone.setVisible(true);
+    }
+
+    redraw() {
+        this.fillZone.setMask(this.composeMask());
+        this.relocateTracer();
     }
 }
 
@@ -164,6 +215,8 @@ const config = {
                   175, 255,  169, 293,  173, 338,  188, 378,  224, 422,  255, 437,  299, 444,  
                   341, 438,  367, 425,  387, 410,  415, 382,  429, 334,  437, 144],
     basePoints2: [437, 144,  437, 455],
+    fillColors: [0xff0000, 0xfc6a03, 0x63d840, 0x468638, 0x1e4a41, 0x13345e, 0x131e57, 0x330066, 
+                 0xa80af5, 0x4c2714, 0x000000],
     type: Phaser.AUTO,
     backgroundColor: '#118eb3',
     /// parent: 'phaser-example',
