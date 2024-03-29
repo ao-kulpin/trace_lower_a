@@ -274,7 +274,7 @@ const config = {
     fillColors: [0xff0000, 0xfc6a03, 0x63d840, 0x468638, 0x1e4a41, 0x13345e, 0x131e57, 0x330066, 
                  0xa80af5, 0x4c2714, 0x000000],
     type: Phaser.AUTO,
-    backgroundColor: '#118eb3',
+    backgroundColor: '#FFDB8B', //'#118eb3',
     /// parent: 'phaser-example',
     scene: Tracer
 };
